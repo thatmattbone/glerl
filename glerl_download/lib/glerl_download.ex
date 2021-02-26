@@ -3,6 +3,7 @@ defmodule GlerlDownload do
   Documentation for `GlerlDownload`.
   """
 
+  @spec hello :: :world
   @doc """
   Hello world.
 
@@ -15,4 +16,14 @@ defmodule GlerlDownload do
   def hello do
     :world
   end
+
+  def print_hello do
+    IO.puts("hello, world!")
+  end
 end
+
+#defmodule Foo do
+#  def fart do
+#    :butt
+#  end
+#end

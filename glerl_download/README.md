@@ -1,6 +1,8 @@
 # GlerlDownload
 
-**TODO: Add description**
+Download and save information from:
+https://www.glerl.noaa.gov/metdata/plot_3hr.php?site=chi&units=e#metdata
+
 
 ## Installation
 
