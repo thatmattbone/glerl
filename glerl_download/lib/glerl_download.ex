@@ -22,6 +22,9 @@ defmodule GlerlDownload do
   end
 end
 
+#https://www.glerl.noaa.gov/metdata/chi/2021/20210226.04t.txt
+#https://www.glerl.noaa.gov/metdata/chi/2021/20210225.04t.txt
+
 #defmodule Foo do
 #  def fart do
 #    :butt
