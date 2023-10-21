@@ -1,11 +1,11 @@
-defmodule GlerlDownload.MixProject do
+defmodule Glerl.Archive.MixProject do
   use Mix.Project
 
   def project do
     [
-      app: :glerl_download,
+      app: :glerl_archive,
       version: "0.1.0",
-      elixir: "~> 1.11",
+      elixir: "~> 1.15",
       start_permanent: Mix.env() == :prod,
       deps: deps()
     ]
