@@ -7,7 +7,7 @@ defmodule Glerl.Realtime.MixProject do
       version: "0.1.0",
       elixir: "~> 1.15",
       start_permanent: Mix.env() == :prod,
-      deps: deps()
+      deps: deps(),
     ]
   end
 
@@ -19,7 +19,7 @@ defmodule Glerl.Realtime.MixProject do
         :inets,
         :ssl,
       ],
-      mod: {Glerl.Realtime.Application, []}
+      mod: {Glerl.Realtime.Application, []},
     ]
   end
 
@@ -28,6 +28,7 @@ defmodule Glerl.Realtime.MixProject do
     [
       {:glerl_core, path: "../glerl_core"},
       {:tzdata, "~> 1.1"},
+      {:bounded_map_buffer, "~> 0.1.0"},
     ]
   end
 end
