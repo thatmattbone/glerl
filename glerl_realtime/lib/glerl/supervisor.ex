@@ -4,17 +4,16 @@ defmodule Glerl.Realtime.Supervisor do
   require Logger
 
   def start_link(init_arg) do
-    Logger.info("Glerl.Supervisor.start_link/ #{inspect(init_arg)}")
+    Logger.info("Glerl.Supervisor.start_link/1 #{inspect(init_arg)}")
 
     Supervisor.start_link(__MODULE__, init_arg, name: __MODULE__)
   end
 
   @impl true
   def init(init_arg) do
-    Logger.info("Glerl.Supervisor.init/1, #{inspect(init_arg)}")
+    Logger.info("Glerl.Supervisor.init/1 #{inspect(init_arg)}")
 
     children = [
-      # {DynamicSupervisor, name: KV.BucketSupervisor, strategy: :one_for_one},
       Glerl.Realtime.Poller
     ]
 
