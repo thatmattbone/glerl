@@ -17,13 +17,21 @@ defmodule Glerl.Realtime.Poller do
   def init(init_arg) do
     Logger.info("Glerl.Realtime.Poller.init/1 #{inspect(init_arg)}")
 
-    buffer = BoundedMapBuffer.new(@buffer_size)
-    todays_data = Glerl.Realtime.Downloader.fetch_todays_file()
-    buffer = buffer |> BoundedMapBuffer.push_all(todays_data)
-
+    buffer = init_state()
     schedule_work()
 
     {:ok, buffer}
+  end
+
+  defp init_state() do
+    buffer = BoundedMapBuffer.new(@buffer_size)
+
+    yesterdays_data = Glerl.Realtime.Downloader.fetch_yesterdays_file()
+    todays_data = Glerl.Realtime.Downloader.fetch_todays_file()
+
+    buffer
+      |> BoundedMapBuffer.push_all(yesterdays_data)
+      |> BoundedMapBuffer.push_all(todays_data)
   end
 
   @impl true
