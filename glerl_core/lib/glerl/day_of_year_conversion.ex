@@ -5,19 +5,19 @@ defmodule Glerl.Core.DayOfYearConversion do
   def day_of_year_to_date(year, day_of_year) when rem(year, 4) == 0 and rem(year, 100) != 0 do
     {month, day} = convert_leap_year(day_of_year)
 
-    Date.new(year, month, day)
+    Date.new!(year, month, day)
   end
 
   def day_of_year_to_date(year, day_of_year) when rem(year, 400) == 0 and rem(year, 100) == 0 do
     {month, day} = convert_leap_year(day_of_year)
 
-    Date.new(year, month, day)
+    Date.new!(year, month, day)
   end
 
   def day_of_year_to_date(year, day_of_year) do
     {month, day} = convert_regular_year(day_of_year)
 
-    Date.new(year, month, day)
+    Date.new!(year, month, day)
   end
 
   def convert_leap_year(day_of_year) when day_of_year >= 1   and day_of_year <= 31,  do: {1,  day_of_year - 0  }

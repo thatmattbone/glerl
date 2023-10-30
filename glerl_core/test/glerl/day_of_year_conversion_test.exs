@@ -6,8 +6,9 @@ defmodule Glerl.Core.DayOfYearConversionTest do
   test "big range of years" do
     for year <- 1850..2350 do
       for day <- 1..365 do
-        IO.puts("#{year} #{day}")
-        {:ok, the_date} = day_of_year_to_date(year, day)
+        # IO.puts("#{year} #{day}")
+
+        the_date = day_of_year_to_date(year, day)
 
         assert Date.day_of_year(the_date) == day
       end

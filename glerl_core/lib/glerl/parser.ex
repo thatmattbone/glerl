@@ -1,4 +1,5 @@
 defmodule Glerl.Core.Parser do
+  import Glerl.Core.DayOfYearConversion
 
   @spec input_str_to_lines(String.t()) :: list(String.t())
   def input_str_to_lines(input_str) do
@@ -13,16 +14,11 @@ defmodule Glerl.Core.Parser do
     |> Enum.filter(fn [item1 | _rest] -> item1 == "4" end)
   end
 
-  def parse_utc(utc_str) do
-    # TODO do more with this
-    String.to_integer(utc_str)
-  end
-
   def line_to_typed_line([_id, year, doy, utc, temp_c, speed, gusts, direction]) do
     [
       String.to_integer(year),
       String.to_integer(doy),
-      parse_utc(utc),
+      utc,
       String.to_float(temp_c),
       String.to_float(speed),
       String.to_float(gusts),
@@ -45,10 +41,17 @@ defmodule Glerl.Core.Parser do
   end
 
   def typed_list_to_datapoint([year, doy, utc, temp_c, speed, gusts, direction, humidity]) do
+
+    date = day_of_year_to_date(year, doy)
+
+    hour = utc |> String.slice(0, 2) |> String.to_integer()
+    minute = utc |> String.slice(2, 4) |> String.to_integer()
+    time = Time.new!(hour, minute, 0, 0)
+
+    timestamp = DateTime.new!(date, time, "Etc/UTC")
+
     %Glerl.Core.Datapoint{
-      year: year,
-      doy: doy,
-      utc: utc,
+      timestamp: timestamp,
       temp_c: temp_c,
       speed: speed,
       gusts: gusts,

@@ -1,8 +1,6 @@
 defmodule Glerl.Core.Datapoint do
   defstruct [
-    :year,
-    :doy,
-    :utc,
+    :timestamp,
     :temp_c,
     :speed,
     :gusts,
