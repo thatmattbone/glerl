@@ -18,7 +18,7 @@ defmodule Glerl.Realtime.Poller do
     Logger.info("Glerl.Realtime.Poller.init/1 #{inspect(init_arg)}")
 
     buffer = BoundedMapBuffer.new(@buffer_size)
-    todays_data = Glerl.Realtime.Downloader.fetch_todays_file() |> Enum.reverse()
+    todays_data = Glerl.Realtime.Downloader.fetch_todays_file()
     buffer = buffer |> BoundedMapBuffer.push_all(todays_data)
 
     schedule_work()
@@ -48,16 +48,25 @@ defmodule Glerl.Realtime.Poller do
     Process.send_after(self(), :poll, @poll_every)
   end
 
-  defp update_buffer(current_buffer = %BoundedMapBuffer{}, todays_data = []) do
+  defp update_buffer(current_buffer = %BoundedMapBuffer{}, _todays_data = []) do
     Logger.warning("received empty `todays_data` in update_buffer.")
     current_buffer
   end
 
-  defp update_buffer(current_buffer = %BoundedMapBuffer{}, todays_data = [first | rest]) do
+  defp update_buffer(current_buffer = %BoundedMapBuffer{}, todays_data) do
     Logger.info("updating buffer")
 
-    #BoundedMapBuffer.push()
-    current_buffer
+    current_top = current_buffer |> BoundedMapBuffer.peek()
+    Logger.info("current_top: #{inspect(current_top)}")
+
+    data_to_add = todays_data
+      |> Enum.reverse()
+      |> Enum.take_while(fn datapoint -> DateTime.after?(datapoint.timestamp, current_top.timestamp) end)
+      |> Enum.reverse()
+
+    Logger.info("going to add: #{inspect(data_to_add)}")
+
+    BoundedMapBuffer.push_all(current_buffer, data_to_add)
   end
 
   # calls for sending along state data to clients
