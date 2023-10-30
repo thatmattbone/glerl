@@ -35,7 +35,7 @@ defmodule Glerl.Core.Parser do
     [
       String.to_integer(year),
       String.to_integer(doy),
-      parse_utc(utc),
+      utc,
       String.to_float(temp_c),
       String.to_float(speed),
       String.to_float(gusts),

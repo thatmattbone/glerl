@@ -44,17 +44,6 @@ defmodule Glerl.Realtime.Poller do
     {:noreply, state}
   end
 
-  @impl true
-  def handle_call(:latest, _from, state) do
-    {:reply, BoundedMapBuffer.peek(state), state}
-  end
-
-  @impl true
-  def handle_call(msg, _from, state) do
-    Logger.error("Unexpected message in Glerl.Realtime.Poller.handle_call: #{inspect(msg)}")
-    {:reply, :error, state}
-  end
-
   defp schedule_work() do
     Process.send_after(self(), :poll, @poll_every)
   end
@@ -64,10 +53,22 @@ defmodule Glerl.Realtime.Poller do
     current_buffer
   end
 
-  defp update_buffer(current_buffer = %BoundedMapBuffer{}, todays_data = [first | rest])  do
+  defp update_buffer(current_buffer = %BoundedMapBuffer{}, todays_data = [first | rest]) do
     Logger.info("updating buffer")
 
     #BoundedMapBuffer.push()
     current_buffer
+  end
+
+  # calls for sending along state data to clients
+  @impl true
+  def handle_call(:latest, _from, state) do
+    {:reply, BoundedMapBuffer.peek(state), state}
+  end
+
+  @impl true
+  def handle_call(msg, _from, state) do
+    Logger.error("Unexpected message in Glerl.Realtime.Poller.handle_call: #{inspect(msg)}")
+    {:reply, :error, state}
   end
 end
