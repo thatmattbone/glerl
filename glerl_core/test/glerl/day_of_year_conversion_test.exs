@@ -3,10 +3,10 @@ defmodule Glerl.Core.DayOfYearConversionTest do
   doctest Glerl.Core.DayOfYearConversion
   import Glerl.Core.DayOfYearConversion
 
-  # TODO fix the check for is leap year and expand this time range
   test "big range of years" do
-    for year <- 1901..2099 do
+    for year <- 1850..2350 do
       for day <- 1..365 do
+        IO.puts("#{year} #{day}")
         {:ok, the_date} = day_of_year_to_date(year, day)
 
         assert Date.day_of_year(the_date) == day

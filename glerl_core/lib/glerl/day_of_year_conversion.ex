@@ -1,6 +1,14 @@
 defmodule Glerl.Core.DayOfYearConversion do
 
-  def day_of_year_to_date(year, day_of_year) when rem(year, 4) == 0 do
+  # to be a leap year, the number of the year must be divisible by four except for end of the century years (1900, 2000, 2100) which must be divisible by 400
+
+  def day_of_year_to_date(year, day_of_year) when rem(year, 4) == 0 and rem(year, 100) != 0 do
+    {month, day} = convert_leap_year(day_of_year)
+
+    Date.new(year, month, day)
+  end
+
+  def day_of_year_to_date(year, day_of_year) when rem(year, 400) == 0 and rem(year, 100) == 0 do
     {month, day} = convert_leap_year(day_of_year)
 
     Date.new(year, month, day)
