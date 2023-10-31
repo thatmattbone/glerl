@@ -6,12 +6,12 @@ defmodule Glerl.Core.Parser do
     [_head1, _head2 | lines] = String.trim(input_str) |> String.split("\n")
 
     lines
-    |> Enum.map(fn line ->
-      String.trim(line)
-      |> String.split(" ")
-      |> Enum.filter(fn item -> String.length(item) > 0 end)
-    end)
-    |> Enum.filter(fn [item1 | _rest] -> item1 == "4" end)
+      |> Enum.map(fn line ->
+        String.trim(line)
+          |> String.split(" ")
+          |> Enum.filter(fn item -> String.length(item) > 0 end)
+      end)
+      |> Enum.filter(fn [item1 | _rest] -> item1 == "4" end)
   end
 
   def line_to_typed_line([_id, year, doy, utc, temp_c, speed, gusts, direction]) do
@@ -60,7 +60,7 @@ defmodule Glerl.Core.Parser do
     }
   end
 
-  @spec parse(String.t()) :: list(%Glerl.Core.Datapoint{})
+  @spec parse(String.t()) :: list(Glerl.Core.Datapoint.t())
   def parse(input_str) do
     input_str_to_lines(input_str)
     # |> IO.inspect(limit: :infinity)

@@ -7,4 +7,13 @@ defmodule Glerl.Core.Datapoint do
     :direction,
     :humidity
   ]
+
+  @type t :: %__MODULE__{
+    timestamp: DateTime.t(),
+    temp_c: float(),
+    speed: float(),
+    gusts: float()
+    direction: integer(),
+    humidity: float()
+  }
 end
