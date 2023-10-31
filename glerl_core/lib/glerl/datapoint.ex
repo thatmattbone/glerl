@@ -12,7 +12,7 @@ defmodule Glerl.Core.Datapoint do
     timestamp: DateTime.t(),
     temp_c: float(),
     speed: float(),
-    gusts: float()
+    gusts: float(),
     direction: integer(),
     humidity: float()
   }
