@@ -3,19 +3,15 @@ defmodule Glerl.Core.Parser do
 
   @spec input_str_to_lines(String.t()) :: list(String.t())
   def input_str_to_lines(input_str) do
-    [_head1, _head2 | lines] = String.trim(input_str) |> String.split("\n")
+    # skip the first two lines with headers...
+    [_head1, _head2 | lines] = input_str |> String.trim() |> String.split("\n")
 
-    lines
-      |> Enum.map(fn line ->
-        String.trim(line)
-          |> String.split(" ")
-          |> Enum.filter(fn item -> String.length(item) > 0 end)
-      end)
-      |> Enum.filter(fn [item1 | _rest] -> item1 == "4" end)
+    lines |> Enum.map(&String.split(&1))
   end
 
-  def line_to_typed_line([_id, year, doy, utc, temp_c, speed, gusts, direction]) do
+  def line_to_typed_line([station_id, year, doy, utc, temp_c, speed, gusts, direction]) do
     [
+      String.to_integer(station_id),
       String.to_integer(year),
       String.to_integer(doy),
       utc,
@@ -27,8 +23,9 @@ defmodule Glerl.Core.Parser do
     ]
   end
 
-  def line_to_typed_line([_id, year, doy, utc, temp_c, speed, gusts, direction, humidity]) do
+  def line_to_typed_line([station_id, year, doy, utc, temp_c, speed, gusts, direction, humidity]) do
     [
+      String.to_integer(station_id),
       String.to_integer(year),
       String.to_integer(doy),
       utc,
@@ -40,7 +37,7 @@ defmodule Glerl.Core.Parser do
     ]
   end
 
-  def typed_list_to_datapoint([year, doy, utc, temp_c, speed, gusts, direction, humidity]) do
+  def typed_list_to_datapoint([station_id, year, doy, utc, temp_c, speed, gusts, direction, humidity]) do
 
     date = day_of_year_to_date(year, doy)
 
@@ -48,9 +45,10 @@ defmodule Glerl.Core.Parser do
     minute = utc |> String.slice(2, 4) |> String.to_integer()
     time = Time.new!(hour, minute, 0, 0)
 
-    timestamp = DateTime.new!(date, time, "Etc/UTC")
+    timestamp = DateTime.new!(date, time, "UTC")
 
     %Glerl.Core.Datapoint{
+      station_id: station_id,
       timestamp: timestamp,
       temp_c: temp_c,
       speed: speed,

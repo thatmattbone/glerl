@@ -1,5 +1,6 @@
 defmodule Glerl.Core.Datapoint do
   defstruct [
+    :station_id,
     :timestamp,
     :temp_c,
     :speed,
@@ -9,6 +10,7 @@ defmodule Glerl.Core.Datapoint do
   ]
 
   @type t :: %__MODULE__{
+    station_id: integer(),
     timestamp: DateTime.t(),
     temp_c: float(),
     speed: float(),
