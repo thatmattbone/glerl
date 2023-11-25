@@ -84,6 +84,11 @@ defmodule Glerl.Realtime.Poller do
   end
 
   @impl true
+  def handle_call(:die, _from, state) do
+    {:stop, "killing myself", state}
+  end
+
+  @impl true
   def handle_call(msg, _from, state) do
     Logger.error("Unexpected message in Glerl.Realtime.Poller.handle_call: #{inspect(msg)}")
     {:reply, :error, state}

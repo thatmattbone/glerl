@@ -18,6 +18,7 @@ defmodule Glerl.Realtime.MixProject do
         :logger,
         :inets,
         :ssl,
+        :observer, :wx, :runtime_tools, # need this in elixir 1.15 to get :observer.start() to work
       ],
       mod: {Glerl.Realtime.Application, []},
     ]
