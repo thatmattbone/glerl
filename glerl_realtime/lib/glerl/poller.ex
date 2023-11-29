@@ -36,7 +36,7 @@ defmodule Glerl.Realtime.Poller do
 
   @impl true
   def handle_info(:poll, state) do
-    Logger.info("doing my polling work... #{inspect(state)}")
+    Logger.info("doing my polling work...")
 
     todays_data = Glerl.Realtime.Downloader.fetch_todays_file()
     new_state = update_buffer(state, todays_data)
@@ -72,15 +72,27 @@ defmodule Glerl.Realtime.Poller do
       |> Enum.take_while(fn datapoint -> DateTime.after?(datapoint.timestamp, current_top.timestamp) end)
       |> Enum.reverse()
 
-    Logger.info("going to add: #{inspect(data_to_add)}")
-
-    BoundedMapBuffer.push_all(current_buffer, data_to_add)
+    if length(data_to_add) > 0 do
+      Logger.info("going to add: #{inspect(data_to_add)}")
+      BoundedMapBuffer.push_all(current_buffer, data_to_add)
+    else
+      current_buffer
+    end
   end
 
   # calls for sending along state data to clients
   @impl true
   def handle_call(:latest, _from, state) do
     {:reply, BoundedMapBuffer.peek(state), state}
+  end
+
+  @impl true
+  def handle_call({:latest, count}, _from, state) when is_integer(count) and count > 0 do
+    latest = state
+      |> BoundedMapBuffer.to_list()
+      |> Enum.slice(0, count)
+
+    {:reply, latest, state}
   end
 
   @impl true

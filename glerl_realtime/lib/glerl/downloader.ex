@@ -45,4 +45,14 @@ defmodule Glerl.Realtime.Downloader do
   def fetch_todays_file() do
     get_todays_file_url() |> fetch_and_parse_file()
   end
+
+  # ** (FunctionClauseError) no function clause matching in Glerl.Core.Parser.line_to_typed_line/1
+  # (glerl_core 0.1.0) lib/glerl/parser.ex:12: Glerl.Core.Parser.line_to_typed_line(["<title>404", "Not", "Found</title>"])
+  # (elixir 1.15.7) lib/enum.ex:1693: Enum."-map/2-lists^map/1-1-"/2
+  # (glerl_core 0.1.0) lib/glerl/parser.ex:65: Glerl.Core.Parser.parse/1
+  # (glerl_realtime 0.1.0) lib/glerl/poller.ex:41: Glerl.Realtime.Poller.handle_info/2
+  # (stdlib 5.1.1) gen_server.erl:1077: :gen_server.try_handle_info/3
+  # (stdlib 5.1.1) gen_server.erl:1165: :gen_server.handle_msg/6
+  # (stdlib 5.1.1) proc_lib.erl:241: :proc_lib.init_p_do_apply/3
+
 end
