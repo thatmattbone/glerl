@@ -90,6 +90,7 @@ defmodule Glerl.Realtime.Poller do
   def handle_call({:latest, count}, _from, state) when is_integer(count) and count > 0 do
     latest = state
       |> BoundedMapBuffer.to_list()
+      |> Enum.reverse()
       |> Enum.slice(0, count)
 
     {:reply, latest, state}
