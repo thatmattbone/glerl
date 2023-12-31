@@ -1,6 +1,10 @@
 defmodule Glerl.Core.Parser do
   import Glerl.Core.DayOfYearConversion
 
+  defp meters_per_second_to_knots(speed) do
+      speed * 1.94384
+  end
+
   @spec input_str_to_lines(String.t()) :: list(String.t())
   def input_str_to_lines(input_str) do
     # skip the first two lines with headers...
@@ -16,8 +20,8 @@ defmodule Glerl.Core.Parser do
       String.to_integer(doy),
       utc,
       String.to_float(temp_c),
-      String.to_float(speed),
-      String.to_float(gusts),
+      String.to_float(speed) |> meters_per_second_to_knots(),
+      String.to_float(gusts) |> meters_per_second_to_knots(),
       String.to_integer(direction),
       nil
     ]
@@ -30,8 +34,8 @@ defmodule Glerl.Core.Parser do
       String.to_integer(doy),
       utc,
       String.to_float(temp_c),
-      String.to_float(speed),
-      String.to_float(gusts),
+      String.to_float(speed) |> meters_per_second_to_knots(),
+      String.to_float(gusts) |> meters_per_second_to_knots(),
       String.to_integer(direction),
       String.to_float(humidity)
     ]
