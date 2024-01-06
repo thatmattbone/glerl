@@ -1,9 +1,6 @@
 defmodule Glerl.Core.Parser do
+  import Glerl.Core.Conversion
   import Glerl.Core.DayOfYearConversion
-
-  defp meters_per_second_to_knots(speed) do
-      speed * 1.94384
-  end
 
   @spec input_str_to_lines(String.t()) :: list(String.t())
   def input_str_to_lines(input_str) do
