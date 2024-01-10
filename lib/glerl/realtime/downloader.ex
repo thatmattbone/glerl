@@ -1,5 +1,8 @@
 defmodule Glerl.Realtime.Downloader do
-  # https://www.glerl.noaa.gov/metdata/chi/2022/20220909.04t.txt
+  require Logger
+
+  # the format for these urls looks like:
+  #   https://www.glerl.noaa.gov/metdata/chi/2022/20220909.04t.txt
 
   @spec get_todays_file_url() :: String.t()
   def get_todays_file_url() do
@@ -25,34 +28,32 @@ defmodule Glerl.Realtime.Downloader do
   end
 
 
-  @spec fetch_and_parse_file(String.t()) :: list(%Glerl.Core.Datapoint{})
+  @spec fetch_and_parse_file(String.t()) :: {:ok, list(%Glerl.Core.Datapoint{})} | {:error, integer}
   defp fetch_and_parse_file(file_url) do
-    {:ok, {_status, _headers, response_content}} = :httpc.request(file_url)
+    {:ok, {{_, status_code, _}, _headers, response_content}} = :httpc.request(file_url)
 
-    response_content
-      |> List.to_string()
-      |> Glerl.Core.Parser.parse()
+    Logger.info("fetched #{file_url} with status_code: #{status_code}")
+
+    case status_code do
+      200 ->
+        response_content
+          |> List.to_string()
+          |> Glerl.Core.Parser.parse()
+
+      _ ->
+        {:error, status_code}
+    end
   end
 
 
-  @spec fetch_yesterdays_file() :: list(%Glerl.Core.Datapoint{})
+  @spec fetch_yesterdays_file() :: {:ok, list(%Glerl.Core.Datapoint{})} | {:error, integer}
   def fetch_yesterdays_file() do
     get_yesterdays_file_url() |> fetch_and_parse_file()
   end
 
 
-  @spec fetch_todays_file() :: list(%Glerl.Core.Datapoint{})
+  @spec fetch_todays_file() :: {:ok, list(%Glerl.Core.Datapoint{})} | {:error, integer}
   def fetch_todays_file() do
     get_todays_file_url() |> fetch_and_parse_file()
   end
-
-  # ** (FunctionClauseError) no function clause matching in Glerl.Core.Parser.line_to_typed_line/1
-  # (glerl_core 0.1.0) lib/glerl/parser.ex:12: Glerl.Core.Parser.line_to_typed_line(["<title>404", "Not", "Found</title>"])
-  # (elixir 1.15.7) lib/enum.ex:1693: Enum."-map/2-lists^map/1-1-"/2
-  # (glerl_core 0.1.0) lib/glerl/parser.ex:65: Glerl.Core.Parser.parse/1
-  # (glerl_realtime 0.1.0) lib/glerl/poller.ex:41: Glerl.Realtime.Poller.handle_info/2
-  # (stdlib 5.1.1) gen_server.erl:1077: :gen_server.try_handle_info/3
-  # (stdlib 5.1.1) gen_server.erl:1165: :gen_server.handle_msg/6
-  # (stdlib 5.1.1) proc_lib.erl:241: :proc_lib.init_p_do_apply/3
-
 end
