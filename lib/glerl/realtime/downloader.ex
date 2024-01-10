@@ -36,9 +36,9 @@ defmodule Glerl.Realtime.Downloader do
 
     case status_code do
       200 ->
-        response_content
+        {:ok, response_content
           |> List.to_string()
-          |> Glerl.Core.Parser.parse()
+          |> Glerl.Core.Parser.parse()}
 
       _ ->
         {:error, status_code}

@@ -17,31 +17,53 @@ defmodule Glerl.Realtime.Poller do
   def init(init_arg) do
     Logger.info("Glerl.Realtime.Poller.init/1 #{inspect(init_arg)}")
 
-    buffer = init_state()
-    schedule_work()
+    buffer = BoundedMapBuffer.new(@buffer_size)
+    
+    Kernel.send(self(), :init_state)
 
     {:ok, buffer}
   end
 
-  defp init_state() do
-    buffer = BoundedMapBuffer.new(@buffer_size)
+  @impl true
+  def handle_info(:init_state, state) do
+    yesterdays_data = case Glerl.Realtime.Downloader.fetch_yesterdays_file() do 
+      {:ok, yesterdays_data} -> yesterdays_data
+      {:error, status_code} ->
+        Logger.error("initializing yesterday's data failed, got status_code: #{status_code}")
+        []
+    end
 
-    yesterdays_data = Glerl.Realtime.Downloader.fetch_yesterdays_file()
-    todays_data = Glerl.Realtime.Downloader.fetch_todays_file()
+    todays_data = case Glerl.Realtime.Downloader.fetch_todays_file() do 
+      {:ok, todays_data} -> todays_data
+      {:error, status_code} ->
+        Logger.error("initializing today's data failed, got status_code: #{status_code}")
+        []
+    end
 
-    buffer
+    new_state = state
       |> BoundedMapBuffer.push_all(yesterdays_data)
       |> BoundedMapBuffer.push_all(todays_data)
+
+    Process.send_after(self(), :poll, @poll_every)
+
+    Logger.info("state has been initialized")
+
+    {:noreply, new_state}
   end
 
   @impl true
   def handle_info(:poll, state) do
     Logger.info("doing my polling work...")
 
-    todays_data = Glerl.Realtime.Downloader.fetch_todays_file()
-    new_state = update_buffer(state, todays_data)
+    new_state = case Glerl.Realtime.Downloader.fetch_todays_file() do
+      {:ok, todays_data} ->
+        update_buffer(state, todays_data)
+      {:error, status_code} ->
+        Logger.error("polling work failed, got status_code: #{status_code}")
+        state
+    end
 
-    schedule_work()
+    Process.send_after(self(), :poll, @poll_every)
 
     {:noreply, new_state}
   end
@@ -50,10 +72,6 @@ defmodule Glerl.Realtime.Poller do
   def handle_info(msg, state) do
     Logger.error("Unexpected message in Glerl.Realtime.Poller.handle_info: #{inspect(msg)}")
     {:noreply, state}
-  end
-
-  defp schedule_work() do
-    Process.send_after(self(), :poll, @poll_every)
   end
 
   defp update_buffer(current_buffer = %BoundedMapBuffer{}, _todays_data = []) do
