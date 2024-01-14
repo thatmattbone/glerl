@@ -21,11 +21,11 @@ defmodule Glerl.Archive.Downloader do
 
   @spec fetch_file_for_year(integer()) :: nil
   def fetch_file_for_year(year) when year >= @min_year and year < @max_year do
-    :ssl.start()
-    :inets.start()
+    :ok = :ssl.start()
+    :ok = :inets.start()
 
     {:ok, {_status, _headers, response_content}} = :httpc.request(url_for_year(year))
-    File.write(file_path_for_year(year), response_content)
+    :ok = File.write(file_path_for_year(year), response_content)
 
     nil
   end
