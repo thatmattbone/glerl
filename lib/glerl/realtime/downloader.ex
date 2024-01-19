@@ -30,18 +30,23 @@ defmodule Glerl.Realtime.Downloader do
 
   @spec fetch_and_parse_file(String.t()) :: {:ok, list(%Glerl.Core.Datapoint{})} | {:error, integer}
   defp fetch_and_parse_file(file_url) do
-    {:ok, {{_, status_code, _}, _headers, response_content}} = :httpc.request(file_url)
+    case :httpc.request(file_url) do
+      {:error, _} ->
+        Logger.error("error while fetching #{file_url}")
+        {:error, 500}
 
-    Logger.info("fetched #{file_url} with status_code: #{status_code}")
+      {:ok, {{_, status_code, _}, _headers, response_content}} ->
+        Logger.info("fetched #{file_url} with status_code: #{status_code}")
 
-    case status_code do
-      200 ->
-        {:ok, response_content
-          |> List.to_string()
-          |> Glerl.Core.Parser.parse()}
-
-      _ ->
-        {:error, status_code}
+        case status_code do
+          200 ->
+            {:ok, response_content
+              |> List.to_string()
+              |> Glerl.Core.Parser.parse()}
+    
+          _ ->
+            {:error, status_code}
+        end    
     end
   end
 

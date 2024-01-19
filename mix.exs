@@ -10,7 +10,10 @@ defmodule Glerl.MixProject do
         deps: deps(),
         test_coverage: [
           summary: [threshold: 10]
-        ]
+        ],
+        dialyzer: [
+          flags: [:unmatched_returns, :error_handling, :missing_return, :underspecs],
+        ],
       ]
     end
   
