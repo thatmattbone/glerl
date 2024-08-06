@@ -1,11 +1,11 @@
 defmodule Glerl.MixProject do
     use Mix.Project
-  
+
     def project do
       [
         app: :glerl,
         version: "0.2.0",
-        elixir: "~> 1.15",
+        elixir: "~> 1.17",
         start_permanent: Mix.env() == :prod,
         deps: deps(),
         test_coverage: [
@@ -16,7 +16,7 @@ defmodule Glerl.MixProject do
         ],
       ]
     end
-  
+
     # Run "mix help compile.app" to learn about applications.
     def application do
       [
@@ -24,17 +24,17 @@ defmodule Glerl.MixProject do
             :logger,
             :inets,
             :ssl,
-            :runtime_tools, 
+            :runtime_tools,
 
             # need these two below in elixir 1.15 to get :observer.start() to work
             # :observer,
             # :wx,
-            
+
         ],
         mod: {Glerl.Realtime.Application, []},
       ]
     end
-  
+
     # Run "mix help deps" to learn about dependencies.
     defp deps do
       [
