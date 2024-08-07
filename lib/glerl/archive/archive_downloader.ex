@@ -6,10 +6,19 @@ defmodule Glerl.Archive.Downloader do
     Date.utc_today().year
   end
 
-  # TODO add a check in here on max year
+  @spec check_year!(integer()) :: nil
+  def check_year!(year) do
+    if year > get_max_year() do
+      raise "the year #{year} is in the future."
+    end
+
+    nil
+  end
 
   @spec filename_for_year(integer()) :: String.t()
   def filename_for_year(year) when year >= @min_year do
+    check_year!(year)
+
     "chi#{year}.04t.txt"
   end
 
