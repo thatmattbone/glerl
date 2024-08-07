@@ -7,7 +7,17 @@ defmodule Glerl.Core.Parser do
     # skip the first two lines with headers...
     [_head1, _head2 | lines] = input_str |> String.trim() |> String.split("\n")
 
-    lines |> Enum.map(&String.split(&1))
+    lines
+      |> Enum.map(&String.split(&1))
+      |> Enum.filter(fn [first_item | _]->  # years post 2010 have header info periodically mixed into the data so we filter that out...
+        case Integer.parse(first_item) do
+          # if the first item in the list cannot be parsed as an integer, skip it.
+          {_, ""} ->
+              true
+          _ ->
+            false
+          end
+      end)
   end
 
   def line_to_typed_line([station_id, year, doy, utc, temp_c, speed, gusts, direction]) do
@@ -62,7 +72,6 @@ defmodule Glerl.Core.Parser do
   @spec parse(String.t()) :: list(Glerl.Core.Datapoint.t())
   def parse(input_str) do
     input_str_to_lines(input_str)
-    # |> IO.inspect(limit: :infinity)
     |> Enum.map(&line_to_typed_line/1)
     |> Enum.map(&typed_list_to_datapoint/1)
   end

@@ -26,3 +26,5 @@ glerl_realtime-*.tar
 
 # Temporary files, for example, from tests.
 /tmp/
+
+data

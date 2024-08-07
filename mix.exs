@@ -39,7 +39,7 @@ defmodule Glerl.MixProject do
     defp deps do
       [
         {:dialyxir, "~> 1.4", only: [:dev, :test], runtime: false},
-        {:tzdata, "~> 1.1"},
+        {:tz, "~> 0.27"},
         {:bounded_map_buffer, "~> 0.1.0"},
       ]
     end
