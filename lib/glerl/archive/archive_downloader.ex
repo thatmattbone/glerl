@@ -1,41 +1,48 @@
 defmodule Glerl.Archive.Downloader do
-  @min_year 2000
+  @spec min_year() :: integer()
+  def min_year() do
+    2000
+  end
 
-  @spec get_max_year() :: integer()
-  def get_max_year() do
-    Date.utc_today().year
+  @spec max_year() :: integer()
+  def max_year() do
+    Date.utc_today().year - 1
   end
 
   @spec check_year!(integer()) :: nil
   def check_year!(year) do
-    if year > get_max_year() do
+    if year > max_year() do
       raise "the year #{year} is in the future."
+    end
+
+    if year < min_year() do
+      raise "the year #{year} is before the year #{min_year()}."
     end
 
     nil
   end
 
   @spec filename_for_year(integer()) :: String.t()
-  def filename_for_year(year) when year >= @min_year do
+  def filename_for_year(year) do
     check_year!(year)
 
     "chi#{year}.04t.txt"
   end
 
   @spec url_for_year(integer()) :: String.t()
-  def url_for_year(year) when year >= @min_year do
+  def url_for_year(year) do
     filename = filename_for_year(year)
 
     "https://www.glerl.noaa.gov/metdata/chi/archive/#{filename}"
   end
 
   @spec file_path_for_year(integer()) :: String.t()
-  def file_path_for_year(year) when year >= @min_year do
+  def file_path_for_year(year) do
     Glerl.Archive.DataDir.create_data_dir() <> "/" <> filename_for_year(year)
   end
 
   @spec fetch_file_for_year(integer()) :: nil
-  def fetch_file_for_year(year) when year >= @min_year do
+  def fetch_file_for_year(year) do
     :ok = :ssl.start()
     :ok = :inets.start()
 
@@ -47,13 +54,13 @@ defmodule Glerl.Archive.Downloader do
 
   @spec fetch_all_years() :: nil
   def fetch_all_years() do
-    for year <- @min_year..get_max_year(), do: fetch_file_for_year(year)
+    for year <- min_year()..max_year(), do: fetch_file_for_year(year)
 
     nil
   end
 
   @spec read_file_for_year(integer()) :: String.t()
-  def read_file_for_year(year) when year >= @min_year do
+  def read_file_for_year(year) do
     if not File.exists?(file_path_for_year(year)) do
       fetch_file_for_year(year)
     end

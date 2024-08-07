@@ -1,19 +1,22 @@
 defmodule Mix.Tasks.Glerl do
   use Mix.Task
 
+  alias Glerl.Archive.Downloader
+
   @impl Mix.Task
   def run(_) do
-    IO.puts("starting")
+    min_year = Downloader.min_year()
+    max_year = Downloader.max_year()
+
+    IO.puts("starting glerl downloder for years #{min_year} to #{max_year}.")
 
     all_years =
-      for year <- 2000..2020 do
+      for year <- min_year..max_year do
         IO.puts(year)
 
-        Glerl.Archive.Downloader.read_file_for_year(year)
-        |> Glerl.Core.Parser.parse()
+        Downloader.read_file_for_year(year)
+          |> Glerl.Core.Parser.parse()
       end
-
-    IO.puts("done with parsing")
 
     all_years_flat = Enum.flat_map(all_years, fn x -> x end)
 
