@@ -72,7 +72,7 @@ defmodule Glerl.Core.Parser do
   @spec parse(String.t()) :: list(Glerl.Core.Datapoint.t())
   def parse(input_str) do
     input_str_to_lines(input_str)
-    |> Enum.map(&line_to_typed_line/1)
-    |> Enum.map(&typed_list_to_datapoint/1)
+      |> Enum.map(&line_to_typed_line/1)
+      |> Enum.map(&typed_list_to_datapoint/1)
   end
 end

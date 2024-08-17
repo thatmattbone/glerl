@@ -62,7 +62,11 @@ defmodule Glerl.Archive.Downloader do
     Logger.info("starting glerl downloader for years #{min_year()} to #{max_year()}.")
 
     for year <- min_year()..max_year() do
-      if not File.exists?(file_path_for_year(year)) do
+      file_path = file_path_for_year(year)
+
+      Logger.info("checking for file #{file_path}.")
+
+      if not File.exists?(file_path) do
         fetch_file_for_year(year)
       else
         Logger.info("file for year #{year} already exists. will not fetch.")

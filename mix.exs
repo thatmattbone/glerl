@@ -26,9 +26,9 @@ defmodule Glerl.MixProject do
             :ssl,
             :runtime_tools,
 
-            # need these two below in elixir 1.15 to get :observer.start() to work
-            # :observer,
-            # :wx,
+            # need these two below in elixir 1.17 to get :observer.start() to work
+            :observer,
+            :wx,
 
         ],
         mod: {Glerl.Application, []},
