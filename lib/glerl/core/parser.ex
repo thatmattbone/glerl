@@ -57,10 +57,11 @@ defmodule Glerl.Core.Parser do
     time = Time.new!(hour, minute, 0, 0)
 
     timestamp = DateTime.new!(date, time, "UTC")
+    chicago_timestamp = DateTime.shift_zone!(timestamp, "America/Chicago")
 
     %Glerl.Core.Datapoint{
       station_id: station_id,
-      timestamp: timestamp,
+      timestamp: chicago_timestamp,
       temp_c: temp_c,
       speed: speed,
       gusts: gusts,
