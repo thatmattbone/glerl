@@ -31,7 +31,7 @@ defmodule Glerl.MixProject do
             # :wx,
 
         ],
-        mod: {Glerl.Realtime.Application, []},
+        mod: {Glerl.Application, []},
       ]
     end
 
