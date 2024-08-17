@@ -1,4 +1,6 @@
 defmodule Glerl.Core.Datapoint do
+
+  @derive Jason.Encoder
   defstruct [
     :station_id,
     :timestamp,

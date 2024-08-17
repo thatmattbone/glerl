@@ -40,6 +40,7 @@ defmodule Glerl.MixProject do
       [
         {:dialyxir, "~> 1.4", only: [:dev, :test], runtime: false},
         {:tz, "~> 0.27"},
+        {:jason, "~> 1.4"},
         {:bounded_map_buffer, "~> 0.1.0"},
       ]
     end
