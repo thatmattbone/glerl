@@ -1,20 +1,11 @@
-defmodule Glerl.Archive.ArchiveConverter do
+defmodule Glerl.Archive.Converter do
   require Logger
 
-  alias Glerl.Archive.Downloader
-  alias Glerl.Archive.DataDir
-
-  @spec filename_for_date(Date.t()) :: Sring.t()
-  def filename_for_date(date) do
-    month = String.pad_leading("#{date.month}", 2, "0")
-    day = String.pad_leading("#{date.day}", 2, "0")
-
-    DataDir.create_data_dir() <> "/" <> "#{date.year}_#{month}_#{day}.json"
-  end
+  alias Glerl.Archive
 
   @spec parse_and_clean_year(integer()) :: list(Glerl.Core.Datapoint.t())
   def parse_and_clean_year(year) do
-    Downloader.read_file_for_year(year)
+    Archive.Downloader.read_file_for_year(year)
       |> Glerl.Core.Parser.parse()
       |> Enum.sort_by(&(&1.timestamp), DateTime)
       |> Enum.dedup()
@@ -37,7 +28,7 @@ defmodule Glerl.Archive.ArchiveConverter do
 
   def convert_all_years() do
     all_years_parsed_and_cleaned =
-      for year <- Downloader.min_year()..Downloader.max_year() do
+      for year <- Archive.Downloader.min_year()..Archive.Downloader.max_year() do
         Logger.info("reading and parsing file for year #{year}")
 
         parse_and_clean_year(year)
@@ -52,7 +43,7 @@ defmodule Glerl.Archive.ArchiveConverter do
 
     Logger.info("grouped all the year data")
     for {date, data_points} <- all_years_parsed_and_cleaned do
-      File.write(filename_for_date(date), Jason.encode!(data_points))
+      File.write(Archive.Reader.filename_for_date(date), Jason.encode!(data_points))
 
       date
     end
