@@ -16,6 +16,15 @@ defmodule Glerl.Archive.Reader do
       |> File.read!()
       |> Jason.decode!(keys: :atoms)
       |> Enum.map(&struct(Glerl.Core.Datapoint, &1))
+      |> Enum.map(fn %{timestamp: timestamp_str}=data_point ->
+          {:ok, timestamp, _} = DateTime.from_iso8601(timestamp_str)
+
+          timestamp = timestamp
+            |> DateTime.truncate(:second)
+            |> DateTime.shift_zone!("America/Chicago")
+
+          %{data_point | timestamp: timestamp}
+        end)
   end
 
   # Glerl.Archive.Reader.data_for_date(~D[2023-04-11])
