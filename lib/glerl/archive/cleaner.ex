@@ -6,7 +6,7 @@ defmodule Glerl.Archive.Cleaner do
   @spec check_data(list(Glerl.Datapoint.t()), DateTime.t(), DateTime.t()) :: nil
   def check_data([]=_data_points, start_time, end_time) do
     if start_time != end_time do
-      Logger.warning("start time: #{start_time} does not equal end time: #{end_time}")
+      Logger.warning("start time on empty list: #{start_time} does not equal end time: #{end_time}")
     end
 
     nil
@@ -26,8 +26,8 @@ defmodule Glerl.Archive.Cleaner do
       Logger.warning("second timestamp #{second.timestamp} is not two minutes after first timestamp: #{first.timestamp}")
     end
 
-    if start_time != end_time do
-      Logger.warning("start time: #{start_time} does not equal end time: #{end_time}")
+    if second.timestamp != end_time do
+      Logger.warning("last timestamp in the list: #{second.timestamp} does not equal end time: #{end_time}")
     end
 
     nil
@@ -72,7 +72,6 @@ defmodule Glerl.Archive.Cleaner do
         fix_data([second, third | rest], second.timestamp, end_time, [first | fixed])
       else
         diff = DateTime.diff(second.timestamp, first.timestamp, :minute)
-        IO.puts("#{diff} minute diff from #{first.timestamp} to #{second.timestamp}")
 
         if diff <= 20 do  # less than a 20 minute diff, we just fill in the data with what was happening at the start time
           extra_datapoints = for i <- 2..(diff - 2)//2, into: [] do
@@ -82,13 +81,11 @@ defmodule Glerl.Archive.Cleaner do
           end
           extra_datapoints = Enum.reverse(extra_datapoints)
 
-          IO.inspect(extra_datapoints)
-
           fixed = extra_datapoints ++ [first | fixed]
           fix_data([second, third | rest], second.timestamp, end_time, fixed)
         else
-          IO.puts("fuck")
-          IO.inspect(diff)
+          # IO.puts("fuck")
+          # IO.inspect(diff)
           # IO.inspect(second)
           # IO.inspect(start_time)
           # IO.inspect(end_time)
@@ -125,5 +122,8 @@ defmodule Glerl.Archive.Cleaner do
     fixed = fix_data(data, start_time, end_time)
 
     check_data(fixed)
+
+    nil
+    # IO.inspect(List.last(fixed))
   end
 end

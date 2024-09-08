@@ -5,7 +5,7 @@ defmodule Glerl.Archive.DownloaderTest do
   test "test filename from year" do
     assert Glerl.Archive.Downloader.filename_for_year(2010) == "chi2010.04t.txt"
 
-    assert_raise FunctionClauseError, fn ->
+    assert_raise RuntimeError, fn ->
       Glerl.Archive.Downloader.filename_for_year(1999)
     end
   end
