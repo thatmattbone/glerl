@@ -19,8 +19,6 @@ defmodule Glerl.Archive.Cleaner do
 
     if first.timestamp != start_time do
       Logger.warning("first time not equal to start time: #{first.timestamp} <> #{start_time}")
-      # IO.inspect(first.timestamp, structs: false)
-      # IO.inspect(start_time, structs: false)
     end
 
     if second.timestamp != two_minutes_later do
@@ -43,27 +41,89 @@ defmodule Glerl.Archive.Cleaner do
 
     if first.timestamp != start_time do
       Logger.warning("first time not equal to start time: #{first.timestamp} <> #{start_time}")
-      # IO.inspect(first.timestamp, structs: false)
-      # IO.inspect(start_time, structs: false)
     end
 
     if second.timestamp != two_minutes_later do
-      Logger.warning("two minutes later is: #{two_minutes_later}")
       Logger.warning("second timestamp #{second.timestamp} is not two minutes after first timestamp: #{first.timestamp}")
     end
 
-    check_data([second | datapoints], two_minutes_later, end_time)
+    check_data([second | datapoints], second.timestamp, end_time)
   end
 
-  def test_a_day() do
+  def check_data(datapoints) do
+    check_data(datapoints, List.first(datapoints).timestamp, List.last(datapoints).timestamp)
+  end
+
+  def check_a_day() do
     start_time = DateTime.from_naive!(~N[2023-04-11T00:00:00], "America/Chicago")
     end_time = DateTime.from_naive!(~N[2023-04-11T23:58:00], "America/Chicago")
 
     data = Archive.Reader.data_for_date(DateTime.to_date(start_time))
-    #  |> Enum.slice(0, 10)
 
     check_data(data, start_time, end_time)
   end
 
-  # DateTime.from_naive!(~N[2023-04-11T00:00:00], "America/Chicago")
+  def fix_data([first, second, third | rest], start_time, end_time, fixed) do
+    two_minutes_later = start_time |> DateTime.add(2, :minute)
+
+    if first.timestamp == start_time do
+      if second.timestamp == two_minutes_later do
+        # this is the expected, normal case. everything looks good, keep on truckin'
+        fix_data([second, third | rest], second.timestamp, end_time, [first | fixed])
+      else
+        diff = DateTime.diff(second.timestamp, first.timestamp, :minute)
+        IO.puts("#{diff} minute diff from #{first.timestamp} to #{second.timestamp}")
+
+        if diff <= 20 do  # less than a 20 minute diff, we just fill in the data with what was happening at the start time
+          extra_datapoints = for i <- 2..(diff - 2)//2, into: [] do
+            new_timestamp = DateTime.add(first.timestamp, i, :minute)
+
+            %{first | timestamp: new_timestamp}
+          end
+          extra_datapoints = Enum.reverse(extra_datapoints)
+
+          IO.inspect(extra_datapoints)
+
+          fixed = extra_datapoints ++ [first | fixed]
+          fix_data([second, third | rest], second.timestamp, end_time, fixed)
+        else
+          IO.puts("fuck")
+          IO.inspect(diff)
+          # IO.inspect(second)
+          # IO.inspect(start_time)
+          # IO.inspect(end_time)
+          nil
+        end
+      end
+    end
+    # implement me
+  end
+
+
+  def fix_data([first, second], start_time, end_time, fixed) when first.timestamp == start_time and second.timestamp == end_time do
+    [second, first | fixed]
+  end
+
+  def fix_data([first], _start_time, end_time, fixed) when first.timestamp == end_time do
+    [first | fixed]
+  end
+
+  def fix_data([], _start_time, _end_time, fixed) do
+    fixed
+  end
+
+  def fix_data(data_points, start_time, end_time) do
+    fix_data(data_points, start_time, end_time, [])
+      |> Enum.reverse()
+  end
+
+  def fix_a_day() do
+    start_time = DateTime.from_naive!(~N[2023-04-11T00:00:00], "America/Chicago")
+    end_time = DateTime.from_naive!(~N[2023-04-11T23:58:00], "America/Chicago")
+
+    data = Archive.Reader.data_for_date(DateTime.to_date(start_time))
+    fixed = fix_data(data, start_time, end_time)
+
+    check_data(fixed)
+  end
 end
