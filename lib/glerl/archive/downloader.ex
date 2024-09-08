@@ -18,7 +18,7 @@ defmodule Glerl.Archive.Downloader do
     end
 
     if year < min_year() do
-      raise "the year #{year} is before the year #{min_year()}."
+      raise "the year #{year} is before the minimum supported year #{min_year()}."
     end
 
     nil
