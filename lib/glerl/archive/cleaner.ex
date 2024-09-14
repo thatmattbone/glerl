@@ -121,12 +121,15 @@ defmodule Glerl.Archive.Cleaner do
           fixed = extra_datapoints ++ [first | fixed]
           fix_data([second | rest], second.timestamp, end_time, fixed)
         else
-          # IO.puts("fuck")
-          # IO.inspect(diff)
-          # IO.inspect(second)
-          # IO.inspect(start_time)
-          # IO.inspect(end_time)
-          nil
+          extra_datapoints = for i <- 2..(diff - 2)//2, into: [] do
+            new_timestamp = DateTime.add(first.timestamp, i, :minute)
+
+            %{first | timestamp: new_timestamp, speed: 0.0, gusts: 0.0}  # zero out speed and gusts because gap is so large.
+          end
+          extra_datapoints = Enum.reverse(extra_datapoints)
+
+          fixed = extra_datapoints ++ [first | fixed]
+          fix_data([second | rest], second.timestamp, end_time, fixed)
         end
       end
     end
@@ -155,8 +158,11 @@ defmodule Glerl.Archive.Cleaner do
 
 
   def fix_a_day() do
-    start_time = DateTime.from_naive!(~N[2023-04-11T00:00:00], "America/Chicago")
-    end_time = DateTime.from_naive!(~N[2023-04-11T23:58:00], "America/Chicago")
+    # start_time = DateTime.from_naive!(~N[2023-04-11T00:00:00], "America/Chicago")
+    # end_time = DateTime.from_naive!(~N[2023-04-11T23:58:00], "America/Chicago")
+
+    start_time = DateTime.from_naive!(~N[2008-01-06T00:00:00], "America/Chicago")
+    end_time = DateTime.from_naive!(~N[2008-01-06T23:58:00], "America/Chicago")
 
     data = Archive.Reader.data_for_date(DateTime.to_date(start_time))
     fixed = fix_data(data, start_time, end_time)

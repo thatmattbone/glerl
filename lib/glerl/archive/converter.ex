@@ -43,7 +43,10 @@ defmodule Glerl.Archive.Converter do
 
     Logger.info("grouped all the year data")
     for {date, data_points} <- all_years_parsed_and_cleaned do
-      File.write(Archive.Reader.filename_for_date(date), Jason.encode!(data_points))
+      Logger.info("fixing and writing out #{date}")
+      fixed_datapoints = Archive.Cleaner.fix_data(data_points)  # TODO adjust the end times...
+
+      File.write(Archive.Reader.filename_for_date(date), Jason.encode!(fixed_datapoints))
 
       date
     end
