@@ -66,38 +66,30 @@ defmodule Glerl.Archive.Cleaner do
   end
 
 
-  # def fix_data([first, second, third | rest], start_time, end_time, fixed) do
-  #   two_minutes_later = start_time |> DateTime.add(2, :minute)
+  def fill_data_gap(base_datapoint, diff) when diff <= 20 do  # less than a 20 minute diff, we just fill in the data with what was happening at the start time
+    extra_datapoints = for i <- 2..(diff - 2)//2, into: [] do
+      new_timestamp = DateTime.add(base_datapoint.timestamp, i, :minute)
 
-  #   if first.timestamp == start_time do
-  #     if second.timestamp == two_minutes_later do
-  #       # this is the expected, normal case. everything looks good, keep on truckin'
-  #       fix_data([second, third | rest], second.timestamp, end_time, [first | fixed])
-  #     else
-  #       diff = DateTime.diff(second.timestamp, first.timestamp, :minute)
+      # Logger.warning("little gap adding timestamp #{new_timestamp}")
 
-  #       if diff <= 20 do  # less than a 20 minute diff, we just fill in the data with what was happening at the start time
-  #         extra_datapoints = for i <- 2..(diff - 2)//2, into: [] do
-  #           new_timestamp = DateTime.add(first.timestamp, i, :minute)
+      %{base_datapoint | timestamp: new_timestamp}
+    end
 
-  #           %{first | timestamp: new_timestamp}
-  #         end
-  #         extra_datapoints = Enum.reverse(extra_datapoints)
+    Enum.reverse(extra_datapoints)
+  end
 
-  #         fixed = extra_datapoints ++ [first | fixed]
-  #         fix_data([second, third | rest], second.timestamp, end_time, fixed)
-  #       else
-  #         # IO.puts("fuck")
-  #         # IO.inspect(diff)
-  #         # IO.inspect(second)
-  #         # IO.inspect(start_time)
-  #         # IO.inspect(end_time)
-  #         nil
-  #       end
-  #     end
-  #   end
-  #   # implement me
-  # end
+
+  def fill_data_gap(base_datapoint, diff) do
+    extra_datapoints = for i <- 2..(diff - 2)//2, into: [] do
+      new_timestamp = DateTime.add(base_datapoint.timestamp, i, :minute)
+
+      # Logger.warning("big gap adding timestamp #{new_timestamp}")
+
+      %{base_datapoint | timestamp: new_timestamp, speed: 0.0, gusts: 0.0}  # zero out speed and gusts because gap is so large.
+    end
+
+    Enum.reverse(extra_datapoints)
+  end
 
 
   def fix_data([first, second | rest], start_time, end_time, fixed) do
@@ -110,27 +102,11 @@ defmodule Glerl.Archive.Cleaner do
       else
         diff = DateTime.diff(second.timestamp, first.timestamp, :minute)
 
-        if diff <= 20 do  # less than a 20 minute diff, we just fill in the data with what was happening at the start time
-          extra_datapoints = for i <- 2..(diff - 2)//2, into: [] do
-            new_timestamp = DateTime.add(first.timestamp, i, :minute)
+        extra_datapoints = fill_data_gap(first, diff)
 
-            %{first | timestamp: new_timestamp}
-          end
-          extra_datapoints = Enum.reverse(extra_datapoints)
+        fixed = extra_datapoints ++ [first | fixed]
 
-          fixed = extra_datapoints ++ [first | fixed]
-          fix_data([second | rest], second.timestamp, end_time, fixed)
-        else
-          extra_datapoints = for i <- 2..(diff - 2)//2, into: [] do
-            new_timestamp = DateTime.add(first.timestamp, i, :minute)
-
-            %{first | timestamp: new_timestamp, speed: 0.0, gusts: 0.0}  # zero out speed and gusts because gap is so large.
-          end
-          extra_datapoints = Enum.reverse(extra_datapoints)
-
-          fixed = extra_datapoints ++ [first | fixed]
-          fix_data([second | rest], second.timestamp, end_time, fixed)
-        end
+        fix_data([second | rest], second.timestamp, end_time, fixed)
       end
     end
   end
@@ -141,12 +117,22 @@ defmodule Glerl.Archive.Cleaner do
   end
 
 
+  def fix_data([first], _start_time, end_time, fixed) do  # we have a gap at the end of our data...
+    diff = DateTime.diff(end_time, first.timestamp, :minute)
+
+    extra_datapoints = fill_data_gap(first, diff)
+
+    extra_datapoints ++ [first | fixed]
+  end
+
+
   def fix_data([], _start_time, _end_time, fixed) do
     fixed
   end
 
 
   def fix_data(data_points, start_time, end_time) do
+
     fix_data(data_points, start_time, end_time, [])
       |> Enum.reverse()
   end
@@ -161,13 +147,23 @@ defmodule Glerl.Archive.Cleaner do
     # start_time = DateTime.from_naive!(~N[2023-04-11T00:00:00], "America/Chicago")
     # end_time = DateTime.from_naive!(~N[2023-04-11T23:58:00], "America/Chicago")
 
-    start_time = DateTime.from_naive!(~N[2008-01-06T00:00:00], "America/Chicago")
-    end_time = DateTime.from_naive!(~N[2008-01-06T23:58:00], "America/Chicago")
+    # start_time = DateTime.from_naive!(~N[2008-01-06T00:00:00], "America/Chicago")
+    # end_time = DateTime.from_naive!(~N[2008-01-06T23:58:00], "America/Chicago")
+
+    start_time = DateTime.from_naive!(~N[2010-12-20T00:00:00], "America/Chicago")
+    end_time =   DateTime.from_naive!(~N[2010-12-20T23:58:00], "America/Chicago")
 
     data = Archive.Reader.data_for_date(DateTime.to_date(start_time))
-    fixed = fix_data(data, start_time, end_time)
 
-    check_data(fixed)
+    List.first(data) |> IO.inspect()
+    List.last(data) |> IO.inspect()
+    start_time |> IO.inspect()
+
+    # check_data(data)
+
+    fixed = fix_data(data, start_time, end_time)
+    List.first(data) |> IO.inspect()
+    Enum.slice(fixed, 0, 20) |> IO.inspect()
 
     nil
     # IO.inspect(List.last(fixed))

@@ -43,8 +43,23 @@ defmodule Glerl.Archive.Converter do
 
     Logger.info("grouped all the year data")
     for {date, data_points} <- all_years_parsed_and_cleaned do
-      Logger.info("fixing and writing out #{date}")
-      fixed_datapoints = Archive.Cleaner.fix_data(data_points)  # TODO adjust the end times...
+      start_time = DateTime.from_naive!(~N[2023-04-11T00:00:00], "America/Chicago")
+        |> Map.replace(:day, date.day)
+        |> Map.replace(:month, date.month)
+        |> Map.replace(:year, date.year)
+
+      end_time = DateTime.from_naive!(~N[2023-04-11T23:58:00], "America/Chicago")
+        |> Map.replace(:day, date.day)
+        |> Map.replace(:month, date.month)
+        |> Map.replace(:year, date.year)
+
+
+      Logger.info("fixing and writing out data for date #{date} from #{start_time} --> #{end_time}")
+
+      IO.inspect(List.first(data_points))
+      IO.inspect(List.last(data_points))
+      
+      fixed_datapoints = Archive.Cleaner.fix_data(data_points, start_time, end_time)
 
       File.write(Archive.Reader.filename_for_date(date), Jason.encode!(fixed_datapoints))
 
