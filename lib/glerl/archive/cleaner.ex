@@ -93,9 +93,12 @@ defmodule Glerl.Archive.Cleaner do
 
 
   def fix_data([first, second | rest], start_time, end_time, fixed) do
+    # IO.inspect(first)
+
     two_minutes_later = start_time |> DateTime.add(2, :minute)
 
     if first.timestamp == start_time do
+      IO.puts("equals #{first.timestamp} #{start_time}")
       if second.timestamp == two_minutes_later do
         # this is the expected, normal case. everything looks good, keep on truckin'
         fix_data([second | rest], second.timestamp, end_time, [first | fixed])
@@ -108,6 +111,11 @@ defmodule Glerl.Archive.Cleaner do
 
         fix_data([second | rest], second.timestamp, end_time, fixed)
       end
+    else
+      Logger.warning("not sure what is going on here")
+      IO.inspect(first.timestamp, structs: false)
+      IO.inspect(start_time, structs: false)
+      Logger.warning("need to do something")
     end
   end
 
@@ -132,6 +140,9 @@ defmodule Glerl.Archive.Cleaner do
 
 
   def fix_data(data_points, start_time, end_time) do
+    IO.inspect(List.first(data_points))
+    IO.inspect(start_time)
+    IO.inspect(end_time)
 
     fix_data(data_points, start_time, end_time, [])
       |> Enum.reverse()
@@ -151,19 +162,28 @@ defmodule Glerl.Archive.Cleaner do
     # end_time = DateTime.from_naive!(~N[2008-01-06T23:58:00], "America/Chicago")
 
     start_time = DateTime.from_naive!(~N[2010-12-20T00:00:00], "America/Chicago")
-    end_time =   DateTime.from_naive!(~N[2010-12-20T23:58:00], "America/Chicago")
+    end_time   = DateTime.from_naive!(~N[2010-12-20T23:58:00], "America/Chicago")
 
     data = Archive.Reader.data_for_date(DateTime.to_date(start_time))
+    IO.inspect(length(data))
+    [first, second | _] = data
+    IO.inspect(first)
+    IO.inspect(second)
 
-    List.first(data) |> IO.inspect()
-    List.last(data) |> IO.inspect()
-    start_time |> IO.inspect()
+    #List.first(data) |> IO.inspect()
+    #List.last(data) |> IO.inspect()
+    #start_time |> IO.inspect()
 
     # check_data(data)
 
     fixed = fix_data(data, start_time, end_time)
-    List.first(data) |> IO.inspect()
-    Enum.slice(fixed, 0, 20) |> IO.inspect()
+    IO.inspect(length(fixed))
+    # fixed |> IO.inspect(limit: :infinity)
+
+    # List.first(fixed) |> IO.inspect()
+    # List.last(fixed) |> IO.inspect()
+
+    # Enum.slice(fixed, 0, 20) |> IO.inspect()
 
     nil
     # IO.inspect(List.last(fixed))
