@@ -45,18 +45,11 @@ defmodule Glerl.Archive.Converter do
     Logger.info("grouped all the year data")
     for {date, data_points} <- all_years_parsed_and_cleaned do
       # need a way to convert date to datetime start/end vals that respects CST CDT
+      {:ok, start_time_naive} = DateTime.new(date, ~T[00:00:00.000])
+      {:ok, end_time_naive} = DateTime.new(date, ~T[23:58:00.000])
 
-      # start_time = DateTime.from_naive!(~N[2010-12-20T00:00:00], "America/Chicago")
-      #   |> Map.replace(:day, date.day)
-      #   |> Map.replace(:month, date.month)
-      #   |> Map.replace(:year, date.year)
-      #   |> DateTime.truncate(:second)
-
-      # end_time = DateTime.from_naive!(~N[2010-12-20T23:58:00], "America/Chicago")
-      #   |> Map.replace(:day, date.day)
-      #   |> Map.replace(:month, date.month)
-      #   |> Map.replace(:year, date.year)
-      #   |> DateTime.truncate(:second)
+      start_time = start_time_naive |> DateTime.from_naive!("America/Chicago") |> DateTime.truncate(:second)
+      end_time = end_time_naive |> DateTime.from_naive!("America/Chicago") |> DateTime.truncate(:second)
 
       Logger.info("fixing and writing out data for date #{date} from #{start_time} --> #{end_time}")
 
