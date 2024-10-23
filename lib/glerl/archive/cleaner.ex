@@ -3,6 +3,14 @@ defmodule Glerl.Archive.Cleaner do
 
   alias Glerl.Archive
 
+  # in 2015 there's about a week long gap in the data and this is when we switch from five minute samples to two minute samples.
+  #
+  #
+  # 4 2015 338 1500    0.9     7.0     7.9     197
+  # AirTemp WindSpd WindGst WindDir RelHum
+  # ID Year DOY  UTC     C      m/s     m/s     deg      %
+  #  4 2015 344 2106   14.2    14.3    17.1     191    55.5
+
   @spec check_data(list(Glerl.Datapoint.t()), DateTime.t(), DateTime.t()) :: nil
   def check_data([]=_data_points, start_time, end_time) do
     if start_time != end_time do
