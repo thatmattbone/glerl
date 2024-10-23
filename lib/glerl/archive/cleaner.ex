@@ -143,8 +143,8 @@ defmodule Glerl.Archive.Cleaner do
   end
 
 
-  def get_expected_gap([first, second | _rest]) do
-    expected_gap = DateTime.diff(second.timestamp, first.timestamp, :minute)
+  def get_expected_gap([first, second, third | _rest]) do
+    expected_gap = min(DateTime.diff(second.timestamp, first.timestamp, :minute), DateTime.diff(third.timestamp, second.timestamp, :minute))
 
     case expected_gap do
       2 -> 2
