@@ -98,7 +98,6 @@ defmodule Glerl.Archive.Cleaner do
     two_minutes_later = start_time |> DateTime.add(2, :minute)
 
     if first.timestamp == start_time do
-      IO.puts("equals #{first.timestamp} #{start_time}")
       if second.timestamp == two_minutes_later do
         # this is the expected, normal case. everything looks good, keep on truckin'
         fix_data([second | rest], second.timestamp, end_time, [first | fixed])
@@ -112,10 +111,13 @@ defmodule Glerl.Archive.Cleaner do
         fix_data([second | rest], second.timestamp, end_time, fixed)
       end
     else
-      Logger.warning("not sure what is going on here")
-      IO.inspect(first.timestamp, structs: false)
-      IO.inspect(start_time, structs: false)
-      Logger.warning("need to do something")
+      diff = DateTime.diff(start_time, first.timestamp, :minute)
+
+      Logger.warning("start time diff of #{diff} minutes. #{start_time.minute} <> #{first.timestamp.minute}")
+      # IO.inspect(first.timestamp, structs: false)
+      # IO.inspect(start_time, structs: false)
+      # Logger.warning("need to do something")
+      fix_data([second | rest], second.timestamp, end_time, [first | fixed])
     end
   end
 
@@ -140,10 +142,6 @@ defmodule Glerl.Archive.Cleaner do
 
 
   def fix_data(data_points, start_time, end_time) do
-    IO.inspect(List.first(data_points))
-    IO.inspect(start_time)
-    IO.inspect(end_time)
-
     fix_data(data_points, start_time, end_time, [])
       |> Enum.reverse()
   end

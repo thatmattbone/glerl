@@ -12,20 +12,15 @@ defmodule Glerl.Archive.Converter do
       # fill in missing data in data_points...
   end
 
-  # @spec convert_year(integer()) :: String.t()
-  # def convert_year(year) do
-  #     parsed_year = parse_and_clean_year(year)
-  #       |> Enum.group_by(fn d -> d.timestamp |> DateTime.to_date() end)
 
-  #   for {date, data_points} <- parsed_year do
-  #
+  @spec parse_and_group_year(integer()) :: Map.t()
+  def parse_and_group_year(year) do
+    parse_and_clean_year(year)
+      |> Enum.group_by(fn d -> d.timestamp |> DateTime.to_date() end)
+  end
 
-  #     File.write(filename_for_date(date), Jason.encode!(data_points))
 
-  #     nil
-  #   end
-  # end
-
+  @spec convert_all_years() :: nil
   def convert_all_years() do
     # for year <- Archive.Downloader.min_year()..Archive.Downloader.max_year() do
     all_years_parsed_and_cleaned =
@@ -44,30 +39,28 @@ defmodule Glerl.Archive.Converter do
 
     Logger.info("grouped all the year data")
     for {date, data_points} <- all_years_parsed_and_cleaned do
-      # need a way to convert date to datetime start/end vals that respects CST CDT
+      # convert the date to start datetime and an end datetime.
       {:ok, start_time_naive} = DateTime.new(date, ~T[00:00:00.000])
       {:ok, end_time_naive} = DateTime.new(date, ~T[23:58:00.000])
 
       start_time = start_time_naive |> DateTime.from_naive!("America/Chicago") |> DateTime.truncate(:second)
       end_time = end_time_naive |> DateTime.from_naive!("America/Chicago") |> DateTime.truncate(:second)
 
-      Logger.info("fixing and writing out data for date #{date} from #{start_time} --> #{end_time}")
-
-      IO.inspect(length(data_points))
-      [first, second | _] = data_points
-      IO.inspect(first)
-      IO.inspect(second)
-
       fixed_datapoints = Archive.Cleaner.fix_data(data_points, start_time, end_time)
-      IO.inspect(length(fixed_datapoints))
 
-      # File.write(Archive.Reader.filename_for_date(date), Jason.encode!(data_points))
+      data_points_len = length(data_points)
+      fixed_datapoints_len = length(fixed_datapoints)
 
-      date
+      Logger.info("fixed and writing out data for date #{date} from #{start_time} --> #{end_time}. length(data_points) = #{data_points_len}. length(fixed_datapoints) = #{fixed_datapoints_len}.")
+
+      # [first, second | _] = data_points
+      # IO.inspect(first)
+      # IO.inspect(second)
+      File.write(Archive.Reader.filename_for_date(date), Jason.encode!(data_points))
+
+      nil
     end
 
     nil
   end
-
-
 end
