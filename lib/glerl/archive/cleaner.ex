@@ -113,13 +113,15 @@ defmodule Glerl.Archive.Cleaner do
         fix_data([second | rest], second.timestamp, end_time, expected_gap, fixed)
       end
     else
-      diff = DateTime.diff(start_time, first.timestamp, :minute)
+      diff = DateTime.diff(first.timestamp, start_time, :minute)
 
-      Logger.warning("start time diff of #{diff} minutes. #{start_time.minute} <> #{first.timestamp.minute}")
-      # IO.inspect(first.timestamp, structs: false)
-      # IO.inspect(start_time, structs: false)
-      # Logger.warning("need to do something")
-      fix_data([second | rest], second.timestamp, end_time, expected_gap, [first | fixed])
+      Logger.warning("start time diff of #{diff} minutes. #{start_time} <> #{first.timestamp}")
+
+      # need to fix this. we need to fill the gap between the expected start_time and first.timestamp using the wind/temp info from the second data point
+      extra_datapoints = fill_data_gap(first, diff, expected_gap) |> IO.inspect()
+      fixed = extra_datapoints ++ [first | fixed]
+
+      fix_data([second | rest], second.timestamp, end_time, expected_gap, fixed)
     end
   end
 
