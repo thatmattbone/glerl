@@ -49,7 +49,6 @@ defmodule Glerl.Core.Parser do
   end
 
   def typed_list_to_datapoint([station_id, year, doy, utc, temp_c, speed, gusts, direction, humidity]) do
-
     date = day_of_year_to_date(year, doy)
 
     hour = utc |> String.slice(0, 2) |> String.to_integer()

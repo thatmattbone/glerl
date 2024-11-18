@@ -74,8 +74,8 @@ defmodule Glerl.Archive.Cleaner do
   end
 
 
-  def fill_data_gap(base_datapoint, diff, expected_gap) when diff <= 20 do  # less than a 20 minute diff, we just fill in the data with what was happening at the start time
-    extra_datapoints = for i <- expected_gap..(diff - expected_gap)//expected_gap, into: [] do
+  defp _fill_data_gap(base_datapoint, diff, expected_gap, initial_time_to_add) when diff <= 20 do  # less than a 20 minute diff, we just fill in the data with what was happening at the start time
+    extra_datapoints = for i <- initial_time_to_add..(diff - expected_gap)//expected_gap, into: [] do
       new_timestamp = DateTime.add(base_datapoint.timestamp, i, :minute)
 
       %{base_datapoint | timestamp: new_timestamp}
@@ -85,14 +85,21 @@ defmodule Glerl.Archive.Cleaner do
   end
 
 
-  def fill_data_gap(base_datapoint, diff, expected_gap) do
-    extra_datapoints = for i <- expected_gap..(diff - expected_gap)//expected_gap, into: [] do
+  defp _fill_data_gap(base_datapoint, diff, expected_gap, initial_time_to_add) do
+    extra_datapoints = for i <- initial_time_to_add..(diff - expected_gap)//expected_gap, into: [] do
       new_timestamp = DateTime.add(base_datapoint.timestamp, i, :minute)
 
       %{base_datapoint | timestamp: new_timestamp, speed: 0.0, gusts: 0.0}  # zero out speed and gusts because gap is so large.
     end
 
     Enum.reverse(extra_datapoints)
+  end
+
+  def fill_data_gap(base_datapoint, diff, expected_gap, inclusive \\ false) do
+    case inclusive do
+      true -> _fill_data_gap(base_datapoint, diff, expected_gap, 0)
+      _ -> _fill_data_gap(base_datapoint, diff, expected_gap, expected_gap)
+    end
   end
 
 
@@ -117,8 +124,9 @@ defmodule Glerl.Archive.Cleaner do
 
       Logger.warning("start time diff of #{diff} minutes. #{start_time} <> #{first.timestamp}")
 
-      # need to fix this. we need to fill the gap between the expected start_time and first.timestamp using the wind/temp info from the second data point
-      extra_datapoints = fill_data_gap(first, diff, expected_gap) |> IO.inspect()
+      # need to fix this. we need to fill the gap between the expected start_time and first.timestamp
+      # using the wind/temp info from the second data point
+      extra_datapoints = fill_data_gap(%{first | timestamp: start_time}, diff, expected_gap, true) |> IO.inspect()
       fixed = extra_datapoints ++ [first | fixed]
 
       fix_data([second | rest], second.timestamp, end_time, expected_gap, fixed)
