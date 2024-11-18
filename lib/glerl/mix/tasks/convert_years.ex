@@ -8,6 +8,6 @@ defmodule Mix.Tasks.Glerl.ConvertYears do
 
   @impl Mix.Task
   def run(_) do
-    IO.puts("Hello, from Mix.Tasks.Glerl.ConvertYears")
+    Glerl.Archive.Converter.convert_all_years(2010..2010)
   end
 end
