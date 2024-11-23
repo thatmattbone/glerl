@@ -38,7 +38,7 @@ defmodule Glerl.Archive.Converter do
   end
 
 
-  @spec convert_all_years() :: nil
+  @spec convert_all_years(Range.t()) :: nil
   def convert_all_years(year_range \\ Archive.Downloader.min_year()..Archive.Downloader.max_year()) do
 
     all_years_parsed_and_cleaned = parse_and_group_year_range(year_range)

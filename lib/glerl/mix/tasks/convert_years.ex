@@ -6,8 +6,31 @@ defmodule Mix.Tasks.Glerl.ConvertYears do
 
   require Logger
 
+  alias Glerl.Archive.Downloader
+
+
+  @spec get_year_range(list(String.t())) :: Range.t()
+  def get_year_range([start_year, end_year]) do
+    String.to_integer(start_year)..String.to_integer(end_year)
+  end
+
+
+  @spec get_year_range(list(String.t())) :: Range.t()
+  def get_year_range([year]) do
+    String.to_integer(year)..String.to_integer(year)
+  end
+
+
+  @spec get_year_range(list(String.t())) :: Range.t()
+  def get_year_range([]) do
+    Downloader.min_year()..Downloader.max_year()
+  end
+
+
   @impl Mix.Task
-  def run(_) do
-    Glerl.Archive.Converter.convert_all_years(2010..2010)
+  def run(args) do
+    my_range = get_year_range(args)
+
+    Glerl.Archive.Converter.convert_all_years(my_range)
   end
 end

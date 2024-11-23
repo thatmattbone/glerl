@@ -126,7 +126,8 @@ defmodule Glerl.Archive.Cleaner do
 
       # need to fix this. we need to fill the gap between the expected start_time and first.timestamp
       # using the wind/temp info from the second data point
-      extra_datapoints = fill_data_gap(%{first | timestamp: start_time}, diff, expected_gap, true) |> IO.inspect()
+      extra_datapoints = fill_data_gap(%{first | timestamp: start_time}, diff, expected_gap, true)
+      # extra_datapoints |> IO.inspect()
       fixed = extra_datapoints ++ [first | fixed]
 
       fix_data([second | rest], second.timestamp, end_time, expected_gap, fixed)
@@ -157,8 +158,9 @@ defmodule Glerl.Archive.Cleaner do
     expected_gap = min(DateTime.diff(second.timestamp, first.timestamp, :minute), DateTime.diff(third.timestamp, second.timestamp, :minute))
 
     case expected_gap do
-      2 -> 2
-      5 -> 5
+      2  -> 2
+      5  -> 5
+      15 -> 5
       _ -> raise "Unexpected gap of #{expected_gap} minutes between #{second.timestamp} and #{first.timestamp}"
     end
 
