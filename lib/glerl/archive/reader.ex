@@ -9,6 +9,7 @@ defmodule Glerl.Archive.Reader do
     DataDir.create_data_dir() <> "/" <> "#{date.year}_#{month}_#{day}.json"
   end
 
+  
   @spec data_for_date(Date.t()) :: list(Glerl.Datapoint.t())
   def data_for_date(date) do
     date
@@ -26,6 +27,4 @@ defmodule Glerl.Archive.Reader do
           %{data_point | timestamp: timestamp}
         end)
   end
-
-  # Glerl.Archive.Reader.data_for_date(~D[2023-04-11])
 end
