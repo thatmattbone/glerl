@@ -30,7 +30,18 @@ defmodule Glerl.Archive.Downloader do
 
     "chi#{year}.04t.txt"
   end
+  
+  # Alpena MI, 6, https://www.glerl.noaa.gov/metdata/apn/archive/
+  # Chicago IL, 4, https://www.glerl.noaa.gov/metdata/chi/archive/
+  # Michigan City IN, 7, https://www.glerl.noaa.gov/metdata/mcy/archive/
+  # Milwaukee WI, 1, https://www.glerl.noaa.gov/metdata/mil/archive/
+  # Muskegon MI, 5, https://www.glerl.noaa.gov/metdata/mkg/archive/
+  # South Haven MI 8, https://www.glerl.noaa.gov/metdata/shv/archive/
+  # Thunder Bay Island MI, 10, https://www.glerl.noaa.gov/metdata/tbi/archive/
+  # Toledo Light 2 OH, 12, https://www.glerl.noaa.gov/metdata/tol2/archive/
 
+  # Muskegon Pier Light MI, (archive is different only one year, investigate)
+  
   @spec url_for_year(integer()) :: String.t()
   def url_for_year(year) do
     filename = filename_for_year(year)
