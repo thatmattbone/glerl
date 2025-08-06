@@ -5,7 +5,7 @@ defmodule Glerl.MixProject do
       [
         app: :glerl,
         version: "0.2.0",
-        elixir: "~> 1.17",
+        elixir: "~> 1.18",
         start_permanent: Mix.env() == :prod,
         deps: deps(),
         test_coverage: [
@@ -39,7 +39,7 @@ defmodule Glerl.MixProject do
     defp deps do
       [
         {:dialyxir, "~> 1.4", only: [:dev, :test], runtime: false},
-        {:tz, "~> 0.27"},
+        {:tz, "~> 0.28"},
         {:jason, "~> 1.4"},
         {:bounded_map_buffer, "~> 0.1.0"},
       ]
