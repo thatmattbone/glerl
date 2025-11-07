@@ -8,7 +8,6 @@ defmodule Glerl.Archive.CleanerTest do
   test "fix empty list" do
     start_time = DateTime.from_naive!(~N[2022-05-11T10:00:00], "America/Chicago")
     end_time = DateTime.from_naive!(~N[2022-05-11T10:00:00], "America/Chicago")
-    expected_gap = 2
 
     assert Cleaner.fix_data([], start_time, end_time) == []
   end

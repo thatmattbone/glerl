@@ -100,6 +100,10 @@ defmodule Glerl.Archive.Cleaner do
   end
 
 
+  def get_expected_gap([]) do
+    2
+  end
+
   def get_expected_gap([_first, _second]) do
     2  # default to a two minute gap
   end
@@ -110,6 +114,9 @@ defmodule Glerl.Archive.Cleaner do
 
     case expected_gap do
       2  -> 2
+      4  -> 2
+      6  -> 2
+      8  -> 2
       5  -> 5
       15 -> 5
       _ -> raise "Unexpected gap of #{expected_gap} minutes between #{second.timestamp} and #{first.timestamp}"
@@ -131,7 +138,7 @@ defmodule Glerl.Archive.Cleaner do
     if first.timestamp == start_time do
       if second.timestamp == n_minutes_later do
         # this is the expected, normal case. everything looks good, keep on truckin'
-        fix_data([second | rest], second.timestamp, end_time, expected_gap, [first | fixed])
+        _fix_data([second | rest], second.timestamp, end_time, expected_gap, [first | fixed])
       else
         diff = DateTime.diff(second.timestamp, first.timestamp, :minute)
 
@@ -139,7 +146,7 @@ defmodule Glerl.Archive.Cleaner do
 
         fixed = extra_datapoints ++ [first | fixed]
 
-        fix_data([second | rest], second.timestamp, end_time, expected_gap, fixed)
+        _fix_data([second | rest], second.timestamp, end_time, expected_gap, fixed)
       end
     else
       diff = DateTime.diff(first.timestamp, start_time, :minute)
@@ -152,7 +159,7 @@ defmodule Glerl.Archive.Cleaner do
       # extra_datapoints |> IO.inspect()
       fixed = extra_datapoints ++ [first | fixed]
 
-      fix_data([second | rest], second.timestamp, end_time, expected_gap, fixed)
+      _fix_data([second | rest], second.timestamp, end_time, expected_gap, fixed)
     end
   end
 
