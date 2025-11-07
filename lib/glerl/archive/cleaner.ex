@@ -20,7 +20,6 @@ defmodule Glerl.Archive.Cleaner do
     nil
   end
 
-
   @spec check_data(list(Glerl.Datapoint.t()), DateTime.t(), DateTime.t()) :: nil
   def check_data([first, second]=_data_points, start_time, end_time) do
     two_minutes_later = start_time |> DateTime.add(2, :minute)
@@ -41,7 +40,6 @@ defmodule Glerl.Archive.Cleaner do
     nil
   end
 
-
   @spec check_data(list(Glerl.Datapoint.t()), DateTime.t(), DateTime.t()) :: nil
   def check_data([first, second | datapoints]=_data_points, start_time, end_time) do
     two_minutes_later = start_time |> DateTime.add(2, :minute)
@@ -56,7 +54,6 @@ defmodule Glerl.Archive.Cleaner do
 
     check_data([second | datapoints], second.timestamp, end_time)
   end
-
 
   @spec check_data(list(Glerl.Datapoint.t())) :: nil
   def check_data(datapoints) do
@@ -84,7 +81,6 @@ defmodule Glerl.Archive.Cleaner do
     Enum.reverse(extra_datapoints)
   end
 
-
   defp _fill_data_gap(base_datapoint, diff, expected_gap, initial_time_to_add) do
     extra_datapoints = for i <- initial_time_to_add..(diff - expected_gap)//expected_gap, into: [] do
       new_timestamp = DateTime.add(base_datapoint.timestamp, i, :minute)
@@ -95,6 +91,7 @@ defmodule Glerl.Archive.Cleaner do
     Enum.reverse(extra_datapoints)
   end
 
+
   def fill_data_gap(base_datapoint, diff, expected_gap, inclusive \\ false) do
     case inclusive do
       true -> _fill_data_gap(base_datapoint, diff, expected_gap, 0)
@@ -102,6 +99,26 @@ defmodule Glerl.Archive.Cleaner do
     end
   end
 
+
+  def get_expected_gap([first, second, third | _rest]) do
+    expected_gap = min(DateTime.diff(second.timestamp, first.timestamp, :minute), DateTime.diff(third.timestamp, second.timestamp, :minute))
+
+    case expected_gap do
+      2  -> 2
+      5  -> 5
+      15 -> 5
+      _ -> raise "Unexpected gap of #{expected_gap} minutes between #{second.timestamp} and #{first.timestamp}"
+    end
+  end
+
+
+  def fix_data([], _start_time, _end_time, _expected_gap, fixed) do
+    fixed
+  end
+
+  def fix_data([first], _start_time, end_time, _expected_gap, fixed) when first.timestamp == end_time do
+    [first | fixed]
+  end
 
   def fix_data([first, second | rest], start_time, end_time, expected_gap, fixed) do
     n_minutes_later = start_time |> DateTime.add(expected_gap, :minute)
@@ -134,12 +151,6 @@ defmodule Glerl.Archive.Cleaner do
     end
   end
 
-
-  def fix_data([first], _start_time, end_time, _expected_gap, fixed) when first.timestamp == end_time do
-    [first | fixed]
-  end
-
-
   def fix_data([first], _start_time, end_time, expected_gap, fixed) do  # we have a gap at the end of our data...
     diff = DateTime.diff(end_time, first.timestamp, :minute)
 
@@ -148,22 +159,8 @@ defmodule Glerl.Archive.Cleaner do
     extra_datapoints ++ [first | fixed]
   end
 
-
-  def fix_data([], _start_time, _end_time, _expected_gap, fixed) do
-    fixed
-  end
-
-
-  def get_expected_gap([first, second, third | _rest]) do
-    expected_gap = min(DateTime.diff(second.timestamp, first.timestamp, :minute), DateTime.diff(third.timestamp, second.timestamp, :minute))
-
-    case expected_gap do
-      2  -> 2
-      5  -> 5
-      15 -> 5
-      _ -> raise "Unexpected gap of #{expected_gap} minutes between #{second.timestamp} and #{first.timestamp}"
-    end
-
+  def fix_data(data_points=[], _start_time, _end_time) do
+    data_points
   end
 
   def fix_data(data_points, start_time, end_time) do
@@ -173,6 +170,9 @@ defmodule Glerl.Archive.Cleaner do
       |> Enum.reverse()
   end
 
+  def fix_data(data_points=[]) do
+    data_points
+  end
 
   def fix_data(data_points) do
     fix_data(data_points, List.first(data_points).timestamp, List.last(data_points).timestamp)
