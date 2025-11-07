@@ -100,7 +100,12 @@ defmodule Glerl.Archive.Cleaner do
   end
 
 
+  def get_expected_gap([_first, _second]) do
+    2  # default to a two minute gap
+  end
+
   def get_expected_gap([first, second, third | _rest]) do
+    # this is pretty hacked together and could be improved...
     expected_gap = min(DateTime.diff(second.timestamp, first.timestamp, :minute), DateTime.diff(third.timestamp, second.timestamp, :minute))
 
     case expected_gap do
@@ -112,15 +117,15 @@ defmodule Glerl.Archive.Cleaner do
   end
 
 
-  def fix_data([], _start_time, _end_time, _expected_gap, fixed) do
+  defp _fix_data([], _start_time, _end_time, _expected_gap, fixed) do
     fixed
   end
 
-  def fix_data([first], _start_time, end_time, _expected_gap, fixed) when first.timestamp == end_time do
+  defp _fix_data([first], _start_time, end_time, _expected_gap, fixed) when first.timestamp == end_time do
     [first | fixed]
   end
 
-  def fix_data([first, second | rest], start_time, end_time, expected_gap, fixed) do
+  defp _fix_data([first, second | rest], start_time, end_time, expected_gap, fixed) do
     n_minutes_later = start_time |> DateTime.add(expected_gap, :minute)
 
     if first.timestamp == start_time do
@@ -151,7 +156,7 @@ defmodule Glerl.Archive.Cleaner do
     end
   end
 
-  def fix_data([first], _start_time, end_time, expected_gap, fixed) do  # we have a gap at the end of our data...
+  defp _fix_data([first], _start_time, end_time, expected_gap, fixed) do  # we have a gap at the end of our data...
     diff = DateTime.diff(end_time, first.timestamp, :minute)
 
     extra_datapoints = fill_data_gap(first, diff, expected_gap)
@@ -159,23 +164,25 @@ defmodule Glerl.Archive.Cleaner do
     extra_datapoints ++ [first | fixed]
   end
 
-  def fix_data(data_points=[], _start_time, _end_time) do
-    data_points
-  end
-
   def fix_data(data_points, start_time, end_time) do
     expected_gap = get_expected_gap(data_points)
-
-    fix_data(data_points, start_time, end_time, expected_gap, [])
-      |> Enum.reverse()
+    _fix_data(data_points, start_time, end_time, expected_gap, []) |> Enum.reverse()
   end
 
   def fix_data(data_points=[]) do
     data_points
   end
 
+  def fix_data(data_points=[_a]) do
+    data_points
+  end
+
   def fix_data(data_points) do
-    fix_data(data_points, List.first(data_points).timestamp, List.last(data_points).timestamp)
+    start_time = List.first(data_points).timestamp
+    end_time = List.last(data_points).timestamp
+    expected_gap = get_expected_gap(data_points)
+
+    _fix_data(data_points, start_time, end_time, expected_gap, []) |> Enum.reverse()
   end
 
 
